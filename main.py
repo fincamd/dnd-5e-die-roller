@@ -54,6 +54,7 @@ class Attack:
     bonuses: list[Bonus]
     attack_modifier: int = 0
     attack_roll: int = 0
+    vs_armor_class: int = 0
     damage_roll: int = 0
     has_advantage: bool = False
     has_disadvantage: bool = False
@@ -66,6 +67,7 @@ class Attack:
         logs.append(["Attack condition", self._get_attack_condition()])
         logs.append(
             ["Attack roll", f"{self.attack_roll} + {self.attack_modifier} = {self.attack_roll + self.attack_modifier} vs AC"])
+        logs.append(["Enemy armor class (AC)", self.vs_armor_class])
         logs.append(["Damage roll", f"{self.damage_roll} points of damage"])
 
         return tabulate(logs, headers=["Making an attack for", self.die_expression], tablefmt="outline", colalign=("right",))
@@ -117,7 +119,7 @@ class Attack:
     def make(self):
         self._roll_atack()
         self._roll_damage()
-        if self.attack_roll == 1:
+        if self.attack_roll == 1 or self.attack_roll + self.attack_modifier < self.vs_armor_class:
             self.damage_roll = 0
         elif self.attack_roll == 20:
             self.damage_roll = 2 * self.damage_roll
@@ -132,7 +134,7 @@ def draw_statistics(throw_statistics: dict) -> None:
     ax.set_ylabel("Number of throws")
     ax.tick_params(axis="x", labelrotation=90)
     fig.subplots_adjust(left=0.07, bottom=0.1)
-    plt.xticks(x)
+    # plt.xticks(x)
     plt.show()
 
 
@@ -186,7 +188,8 @@ def main(args):
             attack_modifier=args.attack_modifier,
             has_advantage=has_advantage,
             has_disadvantage=has_disadvantage,
-            force_critical_hit=args.force_critical_hit
+            force_critical_hit=args.force_critical_hit,
+            vs_armor_class=args.armor_class
         ))
 
     total_damage = 0
@@ -218,6 +221,8 @@ if __name__ == "__main__":
                       help="Whether to make all attacks force the attack roll as a critical hit")
     args.add_argument("--attack-modifier", type=int, default=0,
                       help="Specify the attack modifier of the character making the attack")
+    args.add_argument("--armor-class", type=int, default=0,
+                      help="Armor class of the enemy atacked, to take optionally into account when accounting for the damage rolls")
     args.add_argument("--show-distribution", action="store_true", default=False,
                       help="Specify whether to show a distribution graph")
     args.add_argument("--throws", type=int, default=10000,
