@@ -140,7 +140,7 @@ def draw_statistics(throw_statistics: dict) -> None:
 
 # TODO: Change dice_amount name for something more appropriate
 def check_die_syntax(dice_amount: str) -> None:
-    if not compile(r"^(([1-9]\d*)d?(4|6|8|10|12|20|100)|([1-9]\d*))$").fullmatch(dice_amount):
+    if not compile(r"^(([1-9]\d*)d?(2|4|6|8|10|12|20|100)|([1-9]\d*))$").fullmatch(dice_amount):
         raise ValueError(f"Invalid die throw or value: {dice_amount}")
 
 
