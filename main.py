@@ -10,6 +10,7 @@ from argparse import ArgumentParser
 from random import randint
 from re import compile
 from dataclasses import dataclass
+from dataclasses import field
 from typing import Union
 from functools import reduce
 from itertools import chain
@@ -36,9 +37,16 @@ class Bonus:
 class DiceThrow:
     n: int = 1
     faces: int = 6
+    reroll_values: list[int] = field(default_factory=list)
 
     def get_value(self) -> int:
-        return sum([randint(1, self.faces) for _ in range(self.n)])
+        value = 0
+        for _ in range(self.n):
+            result = randint(1, self.faces)
+            if result in self.reroll_values:
+                result = randint(1, self.faces)
+            value += result
+        return value
 
     def get_max(self) -> int:
         return self.n * self.faces
@@ -126,6 +134,9 @@ class Attack:
 
 
 def draw_statistics(throw_statistics: dict) -> None:
+    # In the case the user supplies an AC value, we want to remove the 0-damage attacks
+    if 0 in throw_statistics:
+        del throw_statistics[0]
     x = np_array(list(throw_statistics.keys()))
     y = np_array(list(throw_statistics.values()))
     fig, ax = plt.subplots()
@@ -178,6 +189,7 @@ def main(args):
             die_or_bonus = parse_die_or_bonus(die_or_bonus)
             if type(die_or_bonus) == DiceThrow:
                 die_to_throw.append(die_or_bonus)
+                die_or_bonus.reroll_values = args.reroll_damage_values
             elif type(die_or_bonus) == Bonus:
                 bonuses.append(die_or_bonus)
 
@@ -217,7 +229,7 @@ if __name__ == "__main__":
     args = ArgumentParser(argv)
     args.add_argument("attacks", nargs="+",
                       help="The combination of die to throw. i.e. \"1d8+2d6+4\" // \"1d12+6\" // \"8d8+2d4+2d6+3\"")
-    args.add_argument("--force-critical-hit", action="store_true", default=False, 
+    args.add_argument("--force-critical-hit", action="store_true", default=False,
                       help="Whether to make all attacks force the attack roll as a critical hit")
     args.add_argument("--attack-modifier", type=int, default=0,
                       help="Specify the attack modifier of the character making the attack")
@@ -227,5 +239,7 @@ if __name__ == "__main__":
                       help="Specify whether to show a distribution graph")
     args.add_argument("--throws", type=int, default=10000,
                       help="Specify the number of times to repeat the die throw to calculate the distribution")
+    args.add_argument("--reroll-damage-values", nargs="+", type=int, default=[],
+                      help="A series of values to reroll if the damage die roll these numbers")
 
     main(args.parse_args())
