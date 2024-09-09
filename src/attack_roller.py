@@ -7,53 +7,16 @@ import matplotlib.pyplot as plt
 from numpy import array as np_array
 from sys import argv
 from argparse import ArgumentParser
-from random import randint
 from re import compile
 from dataclasses import dataclass
-from dataclasses import field
 from typing import Union
 from functools import reduce
 from itertools import chain
 from tabulate import tabulate
 
+from common import Bonus, DiceThrow
+
 plt.style.use('_mpl-gallery')
-
-
-@dataclass
-class Bonus:
-    value: int = 0
-
-    def get_value(self) -> int:
-        return self.value
-
-    def get_max(self) -> int:
-        return self.value
-
-    def get_min(self) -> int:
-        return self.value
-
-
-@dataclass
-class DiceThrow:
-    n: int = 1
-    faces: int = 6
-    reroll_values: list[int] = field(default_factory=list)
-
-    def get_value(self) -> int:
-        value = 0
-        for _ in range(self.n):
-            result = randint(1, self.faces)
-            if result in self.reroll_values:
-                result = randint(1, self.faces)
-            value += result
-        return value
-
-    def get_max(self) -> int:
-        return self.n * self.faces
-
-    def get_min(self) -> int:
-        return self.n
-
 
 @dataclass
 class Attack:
@@ -234,7 +197,7 @@ if __name__ == "__main__":
     args.add_argument("--attack-modifier", type=int, default=0,
                       help="Specify the attack modifier of the character making the attack")
     args.add_argument("--armor-class", type=int, default=0,
-                      help="Armor class of the enemy atacked, to take optionally into account when accounting for the damage rolls")
+                      help="Armor class of the enemy atacked, to take into account when rolling the damage")
     args.add_argument("--show-distribution", action="store_true", default=False,
                       help="Specify whether to show a distribution graph")
     args.add_argument("--throws", type=int, default=10000,
