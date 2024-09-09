@@ -1,7 +1,5 @@
-# DnD 5e attack die roller
-A simple Python CLI tool to roll die and (optionally) show the distribution of damage rolls on N amount of throws.
-
-Given a list of die throws for attacks, this application will throw the attack rolls and damage rolls associated and then print a tabular representation of each into the stdout.
+# DnD 5e die roller
+A simple Python CLI relating to die rolling and (optionally) show the distribution of damage rolls on N amount of throws.
 
 ## Installation
 As dependencies I am using `matplotlib` to be able to plot the damage distribution on a bar chart. And `tabulate` to show a pretty representation of the attack outcomes.
@@ -21,7 +19,10 @@ As dependencies I am using `matplotlib` to be able to plot the damage distributi
     ```
 5. Once that's installed, you'll be able to run the CLI tool from the command line. Refer to the following sections to learn how to do that
 
-## Usage
+## Usage of the attack_roller.py module
+
+Given a list of die throws for attacks, this module will throw the attack rolls and damage rolls associated and then print a tabular representation of each into the stdout.
+
 ### Single attack
 To make a single attack simply run this in the console:
 
@@ -103,6 +104,13 @@ $ python main.py 1d10+5 3d4+5 --attack-modifier 5
 Total damage with these attacks: 22 points of damage
 ```
 
+### Specifying an Armor Class value for the attacks(AC)
+In DnD, the AC is a value we use to represent how difficult it is to reach an enemy with an attack. If our attack rolls are greater than or equal to the creature's AC, the attack hits.
+
+There are times during combat where the enemy's AC can be disclosed or guessed based on previous attacks. We can use this information to our advantage by using the `--armor-class` parameter. This will make the program take into account failed attacks whose attack rolls don't reach or surpass this value. Hence, the damage output will be 0.
+
+<!-- TODO Add examples of use and update the rest of prompts as there is a new row for the armor class -->
+
 ### Rolling with Advantage / Disadvantage
 In DnD you can also roll with advantage or disadvantage. This allows you to throw an extra d20 when making the attack and choose the maximum or minimum value, respectively.
 
@@ -178,3 +186,34 @@ These rolls will then be represented into a simple bar chart, shown to you befor
 
 Here is a sample image of that plot:
 ![Bar plot of the damage roll distribution made using a series of attacks passed in as input](img/sample_damage_roll_distribution_1.png)
+
+## Usage of the dice_randomness_check.py module
+
+This module can be used to test whether a dice gives us values in a random manner. Hence, the die wouldn't be biased. This is implemented using a kind of hypothesis statistical check called "run test". It will need an input sequence of values drawn from the same dice, then it will output a table indicating some statistical info about the hypothesis test.
+
+Finally, it will tell us whether we can consider the sample to be random or not (for this dice and given a level of significance, which by default is 0.05)
+
+A couple examples of its use from me using this tool to test my d20s:
+```bash
+$ python src/dice_randomness_check.py 17 16 14 5 19 9 3 5 12 14 12 12 2 8 18 10 5 19 1 9 12
++------------------------------------------+-------------------------------------------------------------+
+|                                   Values | [17, 16, 14, 5, 19, 9, 3, 5, 14, 2, 8, 18, 10, 5, 19, 1, 9] |
+|                        Z-statistic value | 0.13716898705776417                                         |
+|                                  P-value | 0.890897223907666                                           |
+|                       Significance level | 0.05                                                        |
+| Can we assume that the sample is random? | True                                                        |
++------------------------------------------+-------------------------------------------------------------+
+```
+
+```bash
+$ python src/dice_randomness_check.py 2 20 5 7 4 11 17 15 20 9 20 3 17 1 2 20 17 14 16 8 2 7
++------------------------------------------+-------------------------------------------------------------------------------+
+|                                   Values | [2, 20, 5, 7, 4, 11, 17, 15, 20, 9, 20, 3, 17, 1, 2, 20, 17, 14, 16, 8, 2, 7] |
+|                        Z-statistic value | -0.21846572437632572                                                          |
+|                                  P-value | 0.8270662613117976                                                            |
+|                       Significance level | 0.05                                                                          |
+| Can we assume that the sample is random? | True                                                                          |
++------------------------------------------+-------------------------------------------------------------------------------+
+```
+
+>Note: We cannot be 100% sure of our hypothesis (H0: the dice isn't biased, hence the sample is random). We can say that we don't have enough evidence to reject this hypothesis. So, we can say that with this level of significance, we can assume that the sample is random and the dice is not biased.
