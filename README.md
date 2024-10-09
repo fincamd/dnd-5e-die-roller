@@ -27,19 +27,20 @@ Given a list of die throws for attacks, this module will throw the attack rolls 
 To make a single attack simply run this in the console:
 
 ```shell
-$ python main.py 1d4
+$ python src/attack_roller.py 1d4
 ```
 
 This would show an output like this:
 
 ```shell
-$ python main.py 1d4
+$ python src/attack_roller.py 1d4
 +------------------------+--------------------+
 |   Making an attack for | 1d4                |
 +========================+====================+
 |            Attack type | Normal             |
 |       Attack condition | Normal             |
-|            Attack roll | 12 + 0 = 12 vs AC  |
+|            Attack roll | 8 + 0 = 8 vs AC    |
+| Enemy armor class (AC) | 0                  |
 |            Damage roll | 2 points of damage |
 +------------------------+--------------------+
 Total damage with these attacks: 2 points of damage
@@ -52,30 +53,32 @@ Following the idea of the section about single attack throws, we can pass in sev
 To make a single attack simply run this in the console:
 
 ```shell
-$ python main.py 1d10+5 2d4+5
+$ python src/attack_roller.py 1d10+5 2d4+5
 ```
 
 This would show an output like this:
 
 ```shell
-$ python main.py 1d10+5 2d4+5
+$ python src/attack_roller.py 1d10+5 2d4+5
 +------------------------+---------------------+
 |   Making an attack for | 1d10+5              |
 +========================+=====================+
 |            Attack type | Normal              |
 |       Attack condition | Normal              |
-|            Attack roll | 8 + 0 = 8 vs AC     |
-|            Damage roll | 11 points of damage |
+|            Attack roll | 18 + 0 = 18 vs AC   |
+| Enemy armor class (AC) | 0                   |
+|            Damage roll | 15 points of damage |
 +------------------------+---------------------+
 +------------------------+---------------------+
 |   Making an attack for | 2d4+5               |
 +========================+=====================+
 |            Attack type | Normal              |
 |       Attack condition | Normal              |
-|            Attack roll | 18 + 0 = 18 vs AC   |
-|            Damage roll | 11 points of damage |
+|            Attack roll | 10 + 0 = 10 vs AC   |
+| Enemy armor class (AC) | 0                   |
+|            Damage roll | 10 points of damage |
 +------------------------+---------------------+
-Total damage with these attacks: 22 points of damage
+Total damage with these attacks: 25 points of damage
 ```
 
 ### Adding an attack modifier
@@ -84,27 +87,29 @@ In DnD 5e your characters will add an attack modifier, which is a value that add
 You'll see that the integer value you supply is then added to the d20 roll that makes the attack roll result.
 
 ```shell
-$ python main.py 1d10+5 3d4+5 --attack-modifier 5
+$ python src/attack_roller.py 1d10+5 3d4+5 --attack-modifier 5
 +------------------------+--------------------+
 |   Making an attack for | 1d10+5             |
 +========================+====================+
 |            Attack type | Normal             |
 |       Attack condition | Normal             |
-|            Attack roll | 3 + 5 = 8 vs AC    |
-|            Damage roll | 8 points of damage |
+|            Attack roll | 7 + 5 = 12 vs AC   |
+| Enemy armor class (AC) | 0                  |
+|            Damage roll | 7 points of damage |
 +------------------------+--------------------+
 +------------------------+---------------------+
 |   Making an attack for | 3d4+5               |
 +========================+=====================+
-|            Attack type | Normal              |
+|            Attack type | Critical            |
 |       Attack condition | Normal              |
-|            Attack roll | 18 + 5 = 23 vs AC   |
-|            Damage roll | 14 points of damage |
+|            Attack roll | 20 + 5 = 25 vs AC   |
+| Enemy armor class (AC) | 0                   |
+|            Damage roll | 20 points of damage |
 +------------------------+---------------------+
-Total damage with these attacks: 22 points of damage
+Total damage with these attacks: 27 points of damage
 ```
 
-### Specifying an Armor Class value for the attacks(AC)
+### Specifying an Armor Class value for the attacks (AC)
 In DnD, the AC is a value we use to represent how difficult it is to reach an enemy with an attack. If our attack rolls are greater than or equal to the creature's AC, the attack hits.
 
 There are times during combat where the enemy's AC can be disclosed or guessed based on previous attacks. We can use this information to our advantage by using the `--armor-class` parameter. This will make the program take into account failed attacks whose attack rolls don't reach or surpass this value. Hence, the damage output will be 0.
@@ -119,22 +124,24 @@ So if we were to get `14` and `3` as our two d20 rolls, with advantage we would 
 This is supported in this CLI by providing an 'A' character for advantage and 'D' for disadvantage. You can add one of these characters at the end of an attack definition. Like so:
 
 ```shell
-$ python main.py 1d10+5A 3d4+5D 1d4+5 --attack-modifier 5
-+------------------------+---------------------+
-|   Making an attack for | 1d10+5              |
-+========================+=====================+
-|            Attack type | Normal              |
-|       Attack condition | Advantage           |
-|            Attack roll | 10 + 5 = 15 vs AC   |
-|            Damage roll | 14 points of damage |
-+------------------------+---------------------+
+$ python src/attack_roller.py 1d10+5A 3d4+5D 1d4+5 --attack-modifier 5
++------------------------+--------------------+
+|   Making an attack for | 1d10+5             |
++========================+====================+
+|            Attack type | Normal             |
+|       Attack condition | Advantage          |
+|            Attack roll | 7 + 5 = 12 vs AC   |
+| Enemy armor class (AC) | 0                  |
+|            Damage roll | 7 points of damage |
++------------------------+--------------------+
 +------------------------+---------------------+
 |   Making an attack for | 3d4+5               |
 +========================+=====================+
 |            Attack type | Normal              |
 |       Attack condition | Disadvantage        |
-|            Attack roll | 18 + 5 = 23 vs AC   |
-|            Damage roll | 13 points of damage |
+|            Attack roll | 8 + 5 = 13 vs AC    |
+| Enemy armor class (AC) | 0                   |
+|            Damage roll | 12 points of damage |
 +------------------------+---------------------+
 +------------------------+--------------------+
 |   Making an attack for | 1d4+5              |
@@ -142,23 +149,25 @@ $ python main.py 1d10+5A 3d4+5D 1d4+5 --attack-modifier 5
 |            Attack type | Normal             |
 |       Attack condition | Normal             |
 |            Attack roll | 8 + 5 = 13 vs AC   |
-|            Damage roll | 8 points of damage |
+| Enemy armor class (AC) | 0                  |
+|            Damage roll | 9 points of damage |
 +------------------------+--------------------+
-Total damage with these attacks: 35 points of damage
+Total damage with these attacks: 28 points of damage
 ```
 
 ### Forcing critical hit attacks
 You can also force the attacks into being critical hits. That is, rolling a natural 20 in the d20 for the attack roll. In that case you have to set the `--force-critical-hit` flag. Then the output would look something like this:
 
 ```shell
-$ python main.py 1d10+5A 3d4+5D 1d4+5 --attack-modifier 5 --show-distribution --force-critical-hit
+$ python src/attack_roller.py 1d10+5A 3d4+5D 1d4+5 --attack-modifier 5 --force-critical-hit
 +------------------------+---------------------+
 |   Making an attack for | 1d10+5              |
 +========================+=====================+
 |            Attack type | Critical            |
 |       Attack condition | Advantage           |
 |            Attack roll | 20 + 5 = 25 vs AC   |
-|            Damage roll | 16 points of damage |
+| Enemy armor class (AC) | 0                   |
+|            Damage roll | 26 points of damage |
 +------------------------+---------------------+
 +------------------------+---------------------+
 |   Making an attack for | 3d4+5               |
@@ -166,7 +175,8 @@ $ python main.py 1d10+5A 3d4+5D 1d4+5 --attack-modifier 5 --show-distribution --
 |            Attack type | Critical            |
 |       Attack condition | Disadvantage        |
 |            Attack roll | 20 + 5 = 25 vs AC   |
-|            Damage roll | 30 points of damage |
+| Enemy armor class (AC) | 0                   |
+|            Damage roll | 34 points of damage |
 +------------------------+---------------------+
 +------------------------+---------------------+
 |   Making an attack for | 1d4+5               |
@@ -174,9 +184,10 @@ $ python main.py 1d10+5A 3d4+5D 1d4+5 --attack-modifier 5 --show-distribution --
 |            Attack type | Critical            |
 |       Attack condition | Normal              |
 |            Attack roll | 20 + 5 = 25 vs AC   |
-|            Damage roll | 14 points of damage |
+| Enemy armor class (AC) | 0                   |
+|            Damage roll | 18 points of damage |
 +------------------------+---------------------+
-Total damage with these attacks: 60 points of damage
+Total damage with these attacks: 78 points of damage
 ```
 
 ### Plotting damage rolls distribution
